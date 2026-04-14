@@ -1,27 +1,32 @@
-# KES Multi-Asset Price Tracker
+# 🇰🇪 KES Market Intelligence Platform
 
-A robust Python script that fetches live exchange rates for **13 global fiat currencies** and **10 major cryptocurrencies** against the **Kenyan Shilling (KES)** . Data is saved to a timestamped CSV file for analysis and tracking.
+A comprehensive financial data pipeline that scrapes live fiat and cryptocurrency rates against the Kenyan Shilling, stores them in a SQLite database, and provides a full analytics suite including trends, statistics, arbitrage scanning, portfolio tracking, and price alerts.
 
-## Features
-- Fetches fiat rates using the free [currency-api.com](https://currency-api.com) service.
-- Fetches crypto prices using the [CoinGecko API](https://www.coingecko.com/en/api) (free tier).
-- Automatic retry logic for unreliable network connections.
-- Saves all data to `exchange_rates_master.csv` with timestamps.
-- Failover system built-in—if primary fiat source fails, it attempts a calculated fallback.
+## 📦 Modules
 
-## Supported Assets
-**Fiat (13):** USD, EUR, GBP, JPY, CAD, AUD, CHF, CNY, INR, BRL, ZAR, AED, SAR  
-**Crypto (10):** BTC, ETH, XRP, SOL, ADA, AVAX, DOT, MATIC, LINK, UNI, LTC
+| File | Purpose |
+| :--- | :--- |
+| `scraper.py` | Fetches live rates from currency-api.com (fiat) and CoinGecko (crypto). Saves to CSV and database. |
+| `database.py` | SQLite storage engine. Creates tables, saves historical rates, logs runs, provides query functions. |
+| `analytics.py` | Interactive intelligence suite with six modules. |
 
-## Technologies Used
-- Python 3
-- Requests (with custom retry adapters)
-- CSV & Datetime modules
-- CoinGecko API
-- currency-api.com
+## 🧠 Analytics Features
 
-## How to Run
-1. Clone the repository:
+1. **Latest Rates** – Quick snapshot of all tracked assets.
+2. **Asset Statistics** – Min, max, average over entire history.
+3. **Trends Engine** – Direction, percent change, and volatility over custom periods.
+4. **Arbitrage Scanner** – Implied cross‑rates for fiat pairs and BTC/USD path.
+5. **Portfolio Tracker** – Define holdings and value them in real‑time KES.
+6. **Alert System** – Set price thresholds; get notified when conditions are met.
+
+## 📊 Tracked Assets
+
+- **Fiat (13):** USD, EUR, GBP, JPY, CAD, AUD, CHF, CNY, INR, BRL, ZAR, AED, SAR
+- **Crypto (10):** BTC, ETH, XRP, SOL, ADA, AVAX, DOT, MATIC, LINK, UNI, LTC
+
+## 🚀 How to Use
+
+1. **Clone the repository**
    ```bash
    git clone https://github.com/essentialelite0/python-scraper.git
    cd python-scraper
