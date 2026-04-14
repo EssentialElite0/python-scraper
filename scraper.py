@@ -2,6 +2,7 @@ import requests
 from requests.adapters import HTTPAdapter, Retry
 import csv
 from datetime import datetime
+import database as db
 
 # --- CONFIGURATION ---
 BASE_CURRENCY = "KES"
@@ -33,8 +34,8 @@ def create_session_with_retries():
 
 def fetch_fiat_rates():
     """Fetch fiat rates against KES from currency-api.com, then invert to Foreign->KES."""
-    url = f"https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/kes.json"
-    print(f"Fetching fiat rates from currency-api.com...")
+    url = "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/kes.json"
+    print("Fetching fiat rates from currency-api.com...")
     try:
         session = create_session_with_retries()
         response = session.get(url, timeout=15)
@@ -43,7 +44,6 @@ def fetch_fiat_rates():
         
         if "kes" in data:
             raw_rates = data["kes"]
-            # Invert rates: 1 Foreign = X KES
             inverted_rates = {}
             for currency in FIAT_CURRENCIES:
                 raw = raw_rates.get(currency.lower())
@@ -65,7 +65,7 @@ def fetch_crypto_rates():
     headers = {"x-cg-demo-api-key": COINGECKO_API_KEY}
     params = {"ids": crypto_ids_param, "vs_currencies": BASE_CURRENCY.lower()}
     
-    print(f"Fetching crypto rates from CoinGecko...")
+    print("Fetching crypto rates from CoinGecko...")
     try:
         session = create_session_with_retries()
         response = session.get(url, headers=headers, params=params, timeout=20)
@@ -88,7 +88,7 @@ def save_to_csv(data, filename="exchange_rates_master.csv"):
     except FileNotFoundError:
         pass
 
-    with open("rates_new.csv", 'a', newline='', encoding='utf-8') as csvfile:
+    with open(filename, 'a', newline='', encoding='utf-8') as csvfile:
         fieldnames = ['timestamp', 'base_currency', 'asset', 'asset_type', 'rate', 'source']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         if not file_exists:
@@ -114,7 +114,7 @@ def main():
             })
             print(f"  1 {currency} = {rate_kes:.2f} {BASE_CURRENCY}")
 
-    # 2. Crypto rates (already per coin)
+    # 2. Crypto rates
     crypto_rates = fetch_crypto_rates()
     if crypto_rates:
         for coin_id, price_data in crypto_rates.items():
@@ -131,10 +131,14 @@ def main():
                 })
                 print(f"  1 {symbol} = {price:,.2f} {BASE_CURRENCY}")
 
-    # 3. Save
+    # 3. Save to database and CSV
+    db.init_db()
     if all_asset_data:
+        db.save_rates(all_asset_data)
+        db.log_run(len(all_asset_data), "success")
         save_to_csv(all_asset_data)
     else:
+        db.log_run(0, "failed")
         print("No data fetched. Check your API key and internet connection.")
 
 if __name__ == "__main__":
